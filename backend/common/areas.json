@@ -1,0 +1,23 @@
+[
+ {"areaId":"anand-vihar","name":"Anand Vihar","lat":28.6469,"lon":77.3164,"officialStationIds":[235],"sensorIds":[]},
+ {"areaId":"rohini","name":"Rohini","lat":28.7324,"lon":77.1177,"officialStationIds":[10831],"sensorIds":[]},
+ {"areaId":"rk-puram","name":"R K Puram","lat":28.5633,"lon":77.1869,"officialStationIds":[17],"sensorIds":[]},
+ {"areaId":"dwarka","name":"Dwarka","lat":28.5921,"lon":77.0460,"officialStationIds":[6931,5622],"sensorIds":[]},
+ {"areaId":"connaught-place","name":"Connaught Place / ITO","lat":28.6315,"lon":77.2167,"officialStationIds":[5613,6358],"sensorIds":[4712609,8118]},
+ {"areaId":"okhla","name":"Okhla","lat":28.5308,"lon":77.2710,"officialStationIds":[8239],"sensorIds":[]},
+ {"areaId":"punjabi-bagh","name":"Punjabi Bagh","lat":28.6683,"lon":77.1167,"officialStationIds":[50],"sensorIds":[]},
+ {"areaId":"mayur-vihar","name":"Mayur Vihar / Patparganj","lat":28.6075,"lon":77.2937,"officialStationIds":[6960],"sensorIds":[]},
+ {"areaId":"narela","name":"Narela","lat":28.8527,"lon":77.0929,"officialStationIds":[10485],"sensorIds":[]},
+ {"areaId":"bawana","name":"Bawana","lat":28.7762,"lon":77.0511,"officialStationIds":[8472],"sensorIds":[]},
+ {"areaId":"wazirpur","name":"Wazirpur","lat":28.6997,"lon":77.1650,"officialStationIds":[8915],"sensorIds":[]},
+ {"areaId":"ashok-vihar","name":"Ashok Vihar","lat":28.6954,"lon":77.1812,"officialStationIds":[8917],"sensorIds":[]},
+ {"areaId":"jahangirpuri","name":"Jahangirpuri","lat":28.7330,"lon":77.1700,"officialStationIds":[8235],"sensorIds":[]},
+ {"areaId":"vivek-vihar","name":"Vivek Vihar","lat":28.6720,"lon":77.3150,"officialStationIds":[6938],"sensorIds":[]},
+ {"areaId":"jnu-south-delhi","name":"JNU / South Delhi","lat":28.5402,"lon":77.1662,"officialStationIds":[6254663,10484,6148686,5586],"sensorIds":[]},
+ {"areaId":"vasant-kunj","name":"Vasant Kunj","lat":28.5293,"lon":77.1580,"officialStationIds":[6254663,10484],"sensorIds":[4663956]},
+ {"areaId":"greater-kailash","name":"Greater Kailash","lat":28.5494,"lon":77.2430,"officialStationIds":[5586],"sensorIds":[2860223,6145551]},
+ {"areaId":"najafgarh","name":"Najafgarh","lat":28.6092,"lon":76.9798,"officialStationIds":[10488],"sensorIds":[]},
+ {"areaId":"pusa","name":"Pusa","lat":28.6396,"lon":77.1469,"officialStationIds":[6356],"sensorIds":[]},
+ {"areaId":"north-campus","name":"North Campus (DU)","lat":28.6906,"lon":77.2100,"officialStationIds":[5610],"sensorIds":[]},
+ {"areaId":"lodhi-road","name":"Lodhi Road","lat":28.5918,"lon":77.2273,"officialStationIds":[5634],"sensorIds":[]}
+]

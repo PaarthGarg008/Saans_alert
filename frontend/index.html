@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SaansAlert: Delhi air, for you</title>
+<style>
+:root{--ink:#14262b;--muted:#4d5f64;--paper:#eef2ef;--card:#fbfcfb;--line:#cfd9d4;--focus:#0b57d0;
+ --c-Good:#1f8f4e;--f-Good:#fff;--c-Satisfactory:#8bc34a;--f-Satisfactory:#14262b;--c-Moderate:#f4c400;--f-Moderate:#14262b;
+ --c-Poor:#f08a1c;--f-Poor:#14262b;--c-VeryPoor:#d33a2c;--f-VeryPoor:#fff;--c-Severe:#8a1c2f;--f-Severe:#fff}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--ink:#e8f0ec;--muted:#a3b5ad;--paper:#0f1a1d;--card:#172428;--line:#2b3d42}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,"Segoe UI","Noto Sans","Noto Sans Devanagari",sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+h1{font:700 1.25rem/1 Georgia,"Noto Serif",serif;margin:0;letter-spacing:.01em}
+h1 small{display:block;font:400 .8rem/1.4 system-ui,sans-serif;color:var(--muted);margin-top:4px}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.lang{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;cursor:pointer}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+select,input[type=email]{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.hero{background:var(--bg);color:var(--fg);border-radius:14px;padding:22px 20px;margin-bottom:12px}
+.hero .verdict{font:600 1.65rem/1.3 Georgia,"Noto Serif","Noto Serif Devanagari",serif;margin:0 0 18px}
+.hero .meta{font-size:1rem;display:flex;flex-wrap:wrap;gap:4px 18px;align-items:baseline}
+.hero .aqi{font:700 2.4rem/1 Georgia,serif}
+.note{border-left:4px solid var(--line);padding:8px 12px;margin:0 0 12px;background:var(--card);border-radius:0 8px 8px 0;font-size:.95rem}
+.note.warn{border-color:#d33a2c}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+h2{font-size:1rem;margin:0 0 10px}
+.bar{display:grid;grid-template-columns:64px 1fr 92px;gap:10px;align-items:center;margin:6px 0;font-size:.95rem}
+.track{height:12px;background:var(--line);border-radius:6px;overflow:hidden}.fill{height:100%;background:var(--ink)}
+.out{display:flex;align-items:flex-end;gap:2px;height:84px}
+.out span{flex:1;min-width:4px;background:var(--c);border-radius:2px 2px 0 0}
+.scale{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:4px}
+.row{display:flex;gap:8px}.row>*:first-child{flex:1}
+.go{border:0;background:var(--ink);color:var(--paper);border-radius:8px;padding:12px 18px;cursor:pointer;font-weight:600}
+.go:disabled{opacity:.5;cursor:not-allowed}
+.fine{font-size:.82rem;color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+ <header>
+  <h1 id="brand">SaansAlert<small id="tag"></small></h1>
+  <button class="lang" id="lang" type="button" aria-label="Language"></button>
+ </header>
+ <div class="pick">
+  <div><label for="area" id="l-area"></label><select id="area"></select></div>
+  <div><label for="profile" id="l-profile"></label><select id="profile"></select></div>
+ </div>
+ <div id="banner"></div>
+ <div class="hero" id="hero" aria-live="polite" hidden>
+  <p class="verdict" id="advice"></p>
+  <div class="meta"><span class="aqi" id="aqi"></span><span id="cat"></span><span id="dom"></span></div>
+ </div>
+ <div id="status" class="note" role="status"></div>
+ <section id="s-pol" hidden><h2 id="h-pol"></h2><div id="pol"></div><p class="fine" id="other"></p></section>
+ <section id="s-out" hidden><h2 id="h-out"></h2><div class="out" id="out"></div><div class="scale"><span id="o0"></span><span id="o1"></span></div></section>
+ <section id="s-sub"><h2 id="h-sub"></h2>
+  <label for="email" id="l-email"></label>
+  <div class="row"><input id="email" type="email" autocomplete="email" inputmode="email"><button class="go" id="subgo" type="button"></button></div>
+  <p class="fine" id="submsg" role="status"></p></section>
+ <p class="fine" id="disc"></p>
+</main>
+<script src="config.js" onerror="window.CONFIG={API_URL:''}"></script>
+<script src="demo.js" onerror="window.DEMO=null"></script>
+<script>
+const S={en:{tag:"Not just how bad the air is, but what it means for you.",area:"Area",profile:"Who is this for?",
+ profiles:{healthy:"Healthy adult",asthma:"Asthma / COPD",heart:"Heart condition",child:"Child",elderly:"Older adult",pregnant:"Pregnant",outdoor:"Outdoor worker"},
+ cats:{Good:"Good",Satisfactory:"Satisfactory",Moderate:"Moderate",Poor:"Poor","Very Poor":"Very poor",Severe:"Severe"},
+ est:"Estimated AQI",dom:{pm2_5:"driven by PM2.5",pm10:"driven by PM10"},pol:"What is in the air",oth:"Not used in the AQI: ",
+ out:"Next 24 hours (model estimate)",sub:"Get an email when your area turns Poor or worse",email:"Email",subgo:"Subscribe",
+ subok:"Check your inbox and confirm the subscription.",suberr:"Could not subscribe. Check the email address and try again.",
+ subdemo:"Subscriptions need the live site.",loading:"Loading air quality…",err:"Could not load data. Check your connection and try again.",
+ demo:"Recorded sample from 7 Oct 2026. Not live air quality.",stale:"This reading is old. Do not use it for today's decisions.",
+ official:"Official station",community:"Community sensor (less accurate)",model:"Estimated from model data, no recent station reading nearby",
+ away:"km away",upd:"updated",ago:"ago",min:"min",h:"h",d:"days",lastOff:"The last official reading was",notUsed:"old, so it is not used.",noRecent:"No recent official PM2.5 reading, so it is not used.",
+ ug:"µg/m³",now:"now"},
+hi:{tag:"सिर्फ़ हवा कितनी ख़राब है नहीं, आपके लिए इसका मतलब क्या है।",area:"इलाका",profile:"किसके लिए?",
+ profiles:{healthy:"स्वस्थ वयस्क",asthma:"अस्थमा / सीओपीडी",heart:"हृदय रोग",child:"बच्चा",elderly:"बुज़ुर्ग",pregnant:"गर्भवती",outdoor:"बाहर काम करने वाले"},
+ cats:{Good:"अच्छा",Satisfactory:"संतोषजनक",Moderate:"मध्यम",Poor:"खराब","Very Poor":"बहुत खराब",Severe:"गंभीर"},
+ est:"अनुमानित AQI",dom:{pm2_5:"मुख्य कारण PM2.5",pm10:"मुख्य कारण PM10"},pol:"हवा में क्या है",oth:"AQI में शामिल नहीं: ",
+ out:"अगले 24 घंटे (मॉडल अनुमान)",sub:"इलाके की हवा खराब या उससे बुरी होने पर ईमेल पाएँ",email:"ईमेल",subgo:"सब्सक्राइब करें",
+ subok:"अपना इनबॉक्स देखें और सब्सक्रिप्शन की पुष्टि करें।",suberr:"सब्सक्राइब नहीं हो सका। ईमेल जाँचकर दोबारा कोशिश करें।",
+ subdemo:"सब्सक्रिप्शन के लिए लाइव साइट चाहिए।",loading:"हवा की जानकारी आ रही है…",err:"डेटा नहीं आ सका। कनेक्शन जाँचकर दोबारा कोशिश करें।",
+ demo:"7 अक्टूबर 2026 का रिकॉर्ड किया नमूना। यह लाइव नहीं है।",stale:"यह रीडिंग पुरानी है। आज के फ़ैसलों के लिए इस पर भरोसा न करें।",
+ official:"सरकारी स्टेशन",community:"सामुदायिक सेंसर (कम सटीक)",model:"मॉडल डेटा से अनुमान, पास में कोई ताज़ा स्टेशन रीडिंग नहीं",
+ away:"किमी दूर",upd:"अपडेट",ago:"पहले",min:"मिनट",h:"घंटे",d:"दिन",lastOff:"आख़िरी सरकारी रीडिंग",notUsed:"पुरानी है, इसलिए उपयोग नहीं की गई।",noRecent:"कोई ताज़ा सरकारी PM2.5 रीडिंग नहीं है, इसलिए उपयोग नहीं की गई।",
+ ug:"µg/m³",now:"अभी"}};
+const COL={Good:"Good",Satisfactory:"Satisfactory",Moderate:"Moderate",Poor:"Poor","Very Poor":"VeryPoor",Severe:"Severe"};
+const API=(window.CONFIG&&window.CONFIG.API_URL)||"",LIVE=!!API,$=id=>document.getElementById(id);
+const st={lang:"en",area:null,profile:"healthy"};
+try{Object.assign(st,JSON.parse(localStorage.getItem("saansalert")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("saansalert",JSON.stringify(st))}catch(e){}};
+const t=()=>S[st.lang];
+function age(m){const x=t();return m<90?`${m} ${x.min}`:m<2880?`${Math.round(m/60)} ${x.h}`:`${Math.round(m/1440)} ${x.d}`}
+function paint(el,cat){const k=COL[cat];el.style.setProperty("--bg",`var(--c-${k})`);el.style.setProperty("--fg",`var(--f-${k})`)}
+function fillSelect(sel,items,val){sel.replaceChildren(...items.map(([v,l])=>{const o=document.createElement("option");o.value=v;o.textContent=l;return o}));sel.value=val}
+function labels(){const x=t();document.documentElement.lang=st.lang;$("tag").textContent=x.tag;$("l-area").textContent=x.area;$("l-profile").textContent=x.profile;
+ $("h-pol").textContent=x.pol;$("h-out").textContent=x.out;$("h-sub").textContent=x.sub;$("l-email").textContent=x.email;$("subgo").textContent=x.subgo;
+ $("lang").textContent=st.lang==="en"?"हिन्दी":"English";$("subgo").disabled=!LIVE;if(!LIVE)$("submsg").textContent=x.subdemo;
+ fillSelect($("profile"),Object.entries(x.profiles),st.profile)}
+function srcText(d){const x=t(),s=d.source;if(s.type==="model")return x.model;
+ const near=s.distanceKm!=null?`, ${s.distanceKm} ${x.away}`:"";
+ return `${x[s.type]}: ${s.stationName}${near}, ${x.upd} ${age(d.ageMinutes)} ${x.ago}`}
+function render(d){const x=t(),c=d.current;$("hero").hidden=false;paint($("hero"),c.category);
+ $("advice").textContent=d.advice||d.adviceAll[st.profile][st.lang];
+ $("aqi").textContent=c.aqi;$("cat").textContent=`${x.est}: ${x.cats[c.category]}`;$("dom").textContent=x.dom[c.dominant]||"";
+ const lines=[srcText(d)];if(d.source.staleOfficialAgeHours&&d.source.type!=="official")lines.push(d.source.staleOfficialAgeHours>168?x.noRecent:`${x.lastOff} ${age(Math.round(d.source.staleOfficialAgeHours*60))} ${x.notUsed}`);
+ const warn=d.recorded?x.demo:d.stale?x.stale:"";
+ $("status").className="note"+(warn?" warn":"");$("status").replaceChildren(...[warn,...lines].filter(Boolean).map(s=>{const p=document.createElement("div");p.textContent=s;return p}));
+ const pol=$("pol");pol.replaceChildren();$("s-pol").hidden=false;
+ [["pm2_5","PM2.5",250],["pm10","PM10",430]].forEach(([k,n,max])=>{const v=c.components[k];if(v==null)return;
+  const r=document.createElement("div");r.className="bar";r.innerHTML="<b></b><div class=track><div class=fill></div></div><span></span>";
+  r.children[0].textContent=n;r.children[1].firstChild.style.width=Math.min(100,v/max*100)+"%";r.children[2].textContent=`${Math.round(v)} ${x.ug}`;pol.append(r)});
+ const oth=["no2","o3","so2","co"].filter(k=>c.components[k]!=null).map(k=>`${k.toUpperCase()} ${Math.round(c.components[k])}`).join(", ");
+ $("other").textContent=oth?x.oth+oth:"";
+ const o=d.outlook||[];$("s-out").hidden=!o.length;const out=$("out");out.replaceChildren();
+ o.forEach(p=>{const b=document.createElement("span");b.style.height=Math.max(6,Math.min(100,p.aqi/5))+"%";b.style.setProperty("--c",`var(--c-${COL[p.category]})`);
+  b.title=`${new Date(p.ts*1000).toLocaleTimeString(st.lang==="hi"?"hi-IN":"en-IN",{hour:"numeric"})}: AQI ${p.aqi}`;out.append(b)});
+ if(o.length){const f=ts=>new Date(ts*1000).toLocaleTimeString(st.lang==="hi"?"hi-IN":"en-IN",{hour:"numeric",minute:"2-digit"});$("o0").textContent=f(o[0].ts);$("o1").textContent=f(o[o.length-1].ts)}
+ $("disc").textContent=d.disclaimer||(window.DEMO&&window.DEMO.disclaimer[st.lang])||""}
+async function load(){const x=t();$("status").textContent=x.loading;
+ try{let d;if(LIVE){const r=await fetch(`${API}/areas/${st.area}?profile=${st.profile}&lang=${st.lang}`);if(!r.ok)throw 0;d=await r.json()}
+  else d=window.DEMO.data[st.area];render(d)}
+ catch(e){$("hero").hidden=true;$("s-pol").hidden=$("s-out").hidden=true;$("status").className="note warn";$("status").textContent=x.err}}
+async function init(){let areas;
+ try{areas=LIVE?(await(await fetch(API+"/areas")).json()).map(a=>[a.areaId,a.name]):window.DEMO.areas.map(a=>[a.areaId,a.name])}catch(e){$("status").textContent=t().err;return}
+ if(!areas.some(a=>a[0]===st.area))st.area=areas[0][0];fillSelect($("area"),areas,st.area);labels();load()}
+$("area").onchange=e=>{st.area=e.target.value;save();load()};
+$("profile").onchange=e=>{st.profile=e.target.value;save();load()};
+$("lang").onclick=()=>{st.lang=st.lang==="en"?"hi":"en";save();labels();load()};
+$("subgo").onclick=async()=>{const x=t(),m=$("submsg");m.textContent="";
+ try{const r=await fetch(API+"/subscribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("email").value,areaId:st.area,profile:st.profile,language:st.lang})});
+  m.textContent=r.ok?x.subok:x.suberr}catch(e){m.textContent=x.suberr}};
+init();
+</script>
+</body>
+</html>
